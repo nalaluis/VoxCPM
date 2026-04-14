@@ -37,6 +37,11 @@
 </p>
 
 > **Personal fork note:** I'm using this project to experiment with voice cloning for a personal podcast project. Main areas of interest: controllable cloning and multilingual support (English + Spanish). Will add notes under each section as I test things out.
+>
+> **Setup notes (for my own reference):**
+> - Tested on Python 3.10 + CUDA 12.1, works fine
+> - For Spanish cloning, reference audio of ~8–10 seconds seems to give the best results
+> - 48kHz output is great but slow on my 3090; switching to 24kHz for draft runs saves a lot of time
 
 VoxCPM is a **tokenizer-free** Text-to-Speech system that directly generates continuous speech representations via an end-to-end **diffusion autoregressive architecture**, bypassing discrete tokenization to achieve highly natural and expressive synthesis.
 
@@ -44,6 +49,4 @@ VoxCPM is a **tokenizer-free** Text-to-Speech system that directly generates con
 
 ### ✨ Highlights
 
-- 🌍 **30-Language Multilingual** — Input text in any of the 30 supported languages and synthesize directly, no language tag needed
-- 🎨 **Voice Design** — Create a brand-new voice from a natural-language description alone (gender, age, tone, emotion, pace …), no reference audio required
-- 🎛️ **Controllable Cloning** — Clone any voice from a short reference clip, with optional style guidance to steer emotion, pace
+- 🌍 **30-Language Multilingual** — In
