@@ -2,8 +2,8 @@ pretrained_path: /path/to/VoxCPM1.5/
 train_manifest: /path/to/train.jsonl
 val_manifest: null
 sample_rate: 44100
-batch_size: 16
-grad_accum_steps: 1  # Gradient accumulation steps, >1 can increase effective batch size without increasing memory
+batch_size: 8  # Reduced from 16 to fit in my GPU memory (12GB VRAM)
+grad_accum_steps: 2  # Gradient accumulation steps, >1 can increase effective batch size without increasing memory
 num_workers: 2
 num_iters: 2000
 log_interval: 10
