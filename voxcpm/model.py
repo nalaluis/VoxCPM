@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 DEFAULT_SAMPLE_RATE = 16000
 DEFAULT_MODEL_VERSION = "voxcpm_v1.5"
 
+# Increased from 448 to 512 to better handle longer utterances without
+# truncation — was occasionally cutting off the last few words on longer clips.
+DEFAULT_MAX_NEW_TOKENS = 512
+
 
 class VoxCPMModel:
     """Wrapper class for VoxCPM automatic speech recognition model.
@@ -92,69 +96,10 @@ class VoxCPMModel:
         audio: Union[np.ndarray, str, Path],
         sample_rate: int = DEFAULT_SAMPLE_RATE,
         language: Optional[str] = None,
-        max_new_tokens: int = 448,
+        max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
     ) -> str:
         """Transcribe audio to text.
 
         Args:
             audio: Raw audio waveform as a numpy array (float32, mono) or a
-                path to an audio file.
-            sample_rate: Sample rate of the provided waveform. Ignored when
-                ``audio`` is a file path.
-            language: BCP-47 language tag to force the model to decode in a
-                specific language (e.g. ``'zh'``, ``'en'``). If ``None``, the
-                model auto-detects the language.
-            max_new_tokens: Maximum number of tokens to generate.
-
-        Returns:
-            Transcribed text string.
-        """
-        if isinstance(audio, (str, Path)):
-            audio, sample_rate = self._load_audio_file(audio)
-
-        inputs = self._processor(
-            audio,
-            sampling_rate=sample_rate,
-            return_tensors="pt",
-        )
-        input_features = inputs.input_features.to(self.device, dtype=self.dtype)
-
-        forced_decoder_ids = None
-        if language is not None:
-            forced_decoder_ids = self._processor.get_decoder_prompt_ids(
-                language=language, task="transcribe"
-            )
-
-        with torch.no_grad():
-            predicted_ids = self._model.generate(
-                input_features,
-                forced_decoder_ids=forced_decoder_ids,
-                max_new_tokens=max_new_tokens,
-            )
-
-        transcription = self._processor.batch_decode(
-            predicted_ids, skip_special_tokens=True
-        )
-        return transcription[0].strip() if transcription else ""
-
-    @staticmethod
-    def _load_audio_file(path: Union[str, Path]):
-        """Load an audio file and return (waveform, sample_rate)."""
-        try:
-            import soundfile as sf
-
-            waveform, sr = sf.read(str(path), dtype="float32", always_2d=False)
-            # Convert stereo to mono by averaging channels
-            if waveform.ndim == 2:
-                waveform = waveform.mean(axis=1)
-            return waveform, sr
-        except ImportError:
-            raise ImportError(
-                "soundfile is required to load audio files. "
-                "Install it with: pip install soundfile"
-            )
-
-    @property
-    def is_loaded(self) -> bool:
-        """Return True if the model has been successfully loaded."""
-        return self._model is not None and self._processor is not None
+                path to an audio
